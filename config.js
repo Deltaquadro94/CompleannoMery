@@ -104,7 +104,7 @@ window.CONFIG = {
     fuori: ["Alle stelle! Il pallone è ancora in orbita.", "Fuori di un soffio, peccato."],
     var: ["Controllo VAR in corso: silenzio in sala.", "L'arbitro va al monitor."],
     varOk: ["VAR: gol confermato!", "Tutto regolare, il gol vale."],
-    varKo: ["VAR: gol ANNULLATO, fuorigioco millimetrico!", "Annullato: l'arbitro non transige."],
+    varKo: ["VAR: gol ANNULLATO!", "Annullato: l'arbitro non transige."],
     coro: ["Il coro sale dalla curva: lo stadio canta per Mery!"]
   }
 };
