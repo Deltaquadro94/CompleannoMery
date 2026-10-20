@@ -19,10 +19,14 @@ window.CONFIG = {
     giorno: 22,
     mese: 10,
     anno: 2026,
-    oraInizio: "20:30",
+    oraInizio: "21:30",
     oraFine: "",          // lascia "" per "in poi" (nessuna fine fissata)
-    durataIcsOre: 4       // usata solo nel file calendario se oraFine è vuota
+    durataIcsOre: 4       // usata solo nel file calendario se oraFine è vuota (21:30 + 4h = 01:30)
   },
+
+  /* ---------- MEZZANOTTE ----------
+     Frase mostrata su biglietto, dettagli, gratta-e-vinci, figurina e calendario. */
+  notaMezzanotte: "Si aspetta la mezzanotte: il compleanno scatta alle 00:00 del 23 ottobre! 🥂",
 
   /* ---------- LUOGO ---------- */
   luogo: {
@@ -41,13 +45,22 @@ window.CONFIG = {
   whatsappNumero: "",
   whatsappNumeroB64: "",
 
-  /* ---------- SALVATAGGIO RSVP SU GOOGLE FOGLI (facoltativo) ----------
-     Incolla qui l'URL della Web App di Apps Script. Vuoto = disattivato. */
+  /* ---------- SERVER POSTI / DISTINTA / CLASSIFICA (Google Fogli + Apps Script) ----------
+     Serve per: numeri porta-fortuna UNICI (biglietti reali), distinta su Fogli e classifica rigori visibile a tutti.
+     Incolla qui l'URL della Web App (istruzioni in README.md, file apps-script/Code.gs).
+     "" = disattivato (i numeri NON sono unici e la classifica non appare).
+     "demo" = solo per anteprime: dati finti in memoria. */
   scriptUrl: "",
 
   /* ---------- DETTAGLI SERATA ---------- */
   dressCode: "Festivo & Casual",
   programma: "Calcio, amici e tanto cioccolato",
+
+  /* ---------- +1 (la "riserva") ---------- */
+  riserva: {
+    titolo: "Porto la mia riserva (+1)",
+    sottotitolo: "Un giocatore in più in distinta: a Mery piacciono le rose ampie."
+  },
 
   /* ---------- FIGURINA ---------- */
   figurina: {
@@ -77,7 +90,7 @@ window.CONFIG = {
 
   /* ---------- TELECRONACA (ticker in basso) ---------- */
   telecronaca: {
-    benvenuto: "Benvenuti a Mery Arena: stasera si celebrano i 30 anni di Mery!",
+    benvenuto: "Benvenuti a Mery Arena: calcio d'inizio alle 21:30, ma il vero fischio è a mezzanotte, quando Mery compie 30 anni!",
     inattivo: [
       "Sugli spalti si respira aria di festa grande.",
       "Il pubblico è carico: manca solo la festeggiata al centro del campo.",

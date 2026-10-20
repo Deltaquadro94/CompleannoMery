@@ -44,12 +44,31 @@ for n in open("nomi.txt",encoding="utf-8"):
 PY
 ```
 
+## Server: posti unici, distinta e classifica (Google Fogli + Apps Script)
+Un sito statico non può ricordare chi ha scelto un numero. Per avere **numeri porta-fortuna unici** (i biglietti reali),
+la **distinta** in un foglio e la **classifica rigori** visibile a tutti serve questo piccolo server gratuito. 5 minuti:
+
+1. Crea un **Foglio Google** nuovo (es. «Mery Arena»).
+2. Menu **Estensioni → Apps Script**. Cancella il contenuto e incolla il file `apps-script/Code.gs`. Salva.
+3. **Distribuisci → Nuova distribuzione** → tipo **App web** → *Esegui come:* **Me** → *Chi ha accesso:* **Chiunque**. Autorizza.
+4. Copia l'**URL dell'app web** (finisce con `/exec`) e incollalo in `config.js` → `scriptUrl`.
+5. Pubblica. Nel Foglio compaiono da soli i tab `Posti`, `Distinta` (con **il numero scelto da ognuno**, riserva +1 e messaggio) e `Classifica`.
+
+Note: chiunque abbia il link del sito può prenotare un numero o inviare un punteggio. È pensato per una festa tra amici, non per un uso pubblico.
+Se cambi il codice di `Code.gs` ricordati di fare **Distribuisci → Gestisci distribuzioni → Modifica → Nuova versione**.
+Con `scriptUrl: ""` tutto resta locale: i numeri **non** sono unici e la classifica non appare.
+`scriptUrl: "demo"` serve solo per le anteprime (dati finti in memoria).
+
 ## Numero WhatsApp e repo pubblica
 Finché `whatsappNumero` e `whatsappNumeroB64` sono vuoti, il bottone «Conferma su WhatsApp» resta **nascosto**; appare da solo appena inserisci il numero.
 
 Il numero finisce nel codice pubblico (è necessario per il bottone di conferma). Per non averlo in chiaro
 puoi usare la versione codificata: `whatsappNumeroB64: "<risultato di btoa('39XXXXXXXXXX')>"`.
 Non è segreto (chi apre il sito può ricavarlo), ma evita i bot che cercano numeri nel testo dei repo.
+
+## Musica e portiere
+- `assets/champions.mp3`: musica di sottofondo (parte dopo il tap su «Entra nello stadio», in loop, si abbassa durante fanfara e coro). Il tasto mute in alto la spegne. Per cambiarla basta sostituire il file.
+- `assets/portiere-*.webp`: i frame del portiere (pronto, tuffi, esultanza, «indica i difensori»).
 
 ## Debug
 `?fase=N` (1-6) salta direttamente a una fase, utile per controllare layout e testi.
