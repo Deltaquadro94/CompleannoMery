@@ -368,8 +368,8 @@ textarea.in-txt{min-height:92px;resize:none}
 .fr-rate b{display:block;font-size:calc(var(--cw)*.19)}.fr-rate span{font-size:calc(var(--cw)*.073);letter-spacing:.05em}
 .fr-flag{position:absolute;left:11.5%;top:36%;width:15%;height:8.5%;border-radius:2px;border:1px solid rgba(0,0,0,.3);background:linear-gradient(90deg,#009246 33%,#fff 33% 66%,#ce2b37 66%)}
 .fr-club{position:absolute;left:12%;top:47%;width:14%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 30%,#6ab4ff,#1a5fd0);border:2px solid #fff;color:#fff;font-family:var(--f-disp);font-weight:800;font-size:calc(var(--cw)*.07);display:flex;align-items:center;justify-content:center}
-.fr-photo{position:absolute;right:7%;top:11%;width:56%;height:44%;border-radius:10px 10px 0 0;overflow:hidden;background:#d9aa3b}
-.fr-photo img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 20%}
+.fr-photo{position:absolute;right:7%;top:11%;width:56%;height:44%;border-radius:10px 10px 0 0;overflow:hidden;background:radial-gradient(circle at 50% 30%,#f7dc84,#d9aa3b 70%)}
+.fr-photo img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 100%}
 .fr-name{position:absolute;left:0;right:0;top:58.5%;text-align:center;font-family:var(--f-disp);font-weight:800;font-size:calc(var(--cw)*.135);letter-spacing:.05em;text-transform:uppercase;line-height:1;
   padding-bottom:5px;margin:0 9%;border-bottom:2px solid rgba(42,28,0,.4)}
 .fr-stats{position:absolute;left:12%;right:12%;top:69%;display:grid;grid-template-columns:1fr 1fr;gap:0 calc(var(--cw)*.06);font-family:var(--f-disp);font-weight:800;font-size:calc(var(--cw)*.08);line-height:1.12}
@@ -689,6 +689,7 @@ textarea.in-txt{min-height:92px;resize:none}
             <button class="btn ghost" id="btnIcs" type="button">📅 Calendario</button>
           </div>
           <button class="btn ghost block" id="btnShare" type="button">↗ Condividi l'invito</button>
+          <button class="linkbtn" id="btnReset" type="button">Non sei <span id="rsNome"></span>? Ricomincia da capo</button>
           <p class="sub">Il calendario non si apre? Prova da Safari/Chrome (menu ⋯ → «Apri nel browser») oppure <a id="lnkGcal" href="#" target="_blank" rel="noopener">aggiungi con Google Calendar</a>.</p>
         </div>
       </div>
@@ -754,7 +755,7 @@ function romeOffsetMin(y,m,d){ // CEST (+120) dall'ultima domenica di marzo a qu
 var START=Date.UTC(D.anno,D.mese-1,D.giorno,hh,mm)-romeOffsetMin(D.anno,D.mese,D.giorno)*60000;
 
 /* ---------- stato (solo in memoria, niente localStorage) ---------- */
-var S={nome:'',posto:7,codice:'',presenza:'',msg:'',rigori:0,best:0,tiri:0,hype:12,chant:false,validated:false,phase:0,taken:[],mio:null,riserva:false,riservaNome:''};
+var S={nome:'',posto:7,codice:'',presenza:'',msg:'',rigori:0,best:0,tiri:0,hype:12,chant:false,validated:false,phase:0,taken:[],mio:null,riserva:false,riservaNome:'',done:false};
 function cleanName(s){
   s=String(s||'');
   try{s=s.normalize('NFC').replace(/[^\p{L}\p{M}\s'’.-]/gu,'')}catch(e){s=s.replace(/[^A-Za-zÀ-ÿ\s'.-]/g,'')}
@@ -762,6 +763,28 @@ function cleanName(s){
   return s.toLowerCase().replace(/(^|[\s'’.-])(\S)/g,function(m,a,b){return a+b.toUpperCase()});
 }
 try{S.nome=cleanName(new URLSearchParams(location.search).get('nome'))}catch(e){}
+/* Memoria SOLO su questo telefono (localStorage): chi ha già fatto il percorso rientra direttamente nell'invito.
+   Contiene nome, posto, record rigori, presenza, riserva e messaggio. Non viene inviata a nessuno. */
+var STORE_KEY='mery-arena-v1';
+function loadSaved(){
+  try{
+    var j=JSON.parse(localStorage.getItem(STORE_KEY)||'null');if(!j||typeof j!=='object')return null;
+    var n=cleanName(j.nome);if(!n)return null;
+    return {nome:n,posto:Math.max(1,Math.min(99,parseInt(j.posto,10)||0))||7,codice:/^M30-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(j.codice||'')?j.codice:'',
+      presenza:({titolare:1,panchina:1,infortunato:1})[j.presenza]?j.presenza:'',msg:String(j.msg||'').slice(0,300),riserva:!!j.riserva,
+      riservaNome:cleanName(j.riservaNome),best:Math.max(0,Math.min(5,parseInt(j.best,10)||0)),done:!!j.done};
+  }catch(e){return null}
+}
+function saveState(){
+  try{localStorage.setItem(STORE_KEY,JSON.stringify({nome:S.nome,posto:S.posto,codice:S.codice,presenza:S.presenza,msg:S.msg,riserva:S.riserva,riservaNome:S.riservaNome,best:S.best,done:S.done}))}catch(e){}
+}
+function clearSaved(){try{localStorage.removeItem(STORE_KEY)}catch(e){}}
+(function(){
+  var sv=loadSaved();if(!sv)return;
+  if(S.nome&&norm(S.nome)!==norm(sv.nome)){clearSaved();return}      // il link è di un'altra persona: si riparte da zero
+  S.nome=sv.nome;S.posto=sv.posto;if(sv.codice)S.codice=sv.codice;S.presenza=sv.presenza;S.msg=sv.msg;
+  S.riserva=sv.riserva;S.riservaNome=sv.riservaNome;S.best=sv.best;S.done=sv.done&&!!sv.presenza;
+})();
 
 /* =============================================================
    AUDIO – tutto sintetizzato con WebAudio, parte dopo un tap
@@ -1048,7 +1071,8 @@ var Voce=(function(){
 })();
 
 /* ---------- FASE 0 ---------- */
-$('#hello').innerHTML=S.nome?('Ciao <b></b>, sei convocato per i <b>30 anni</b> di Mery.'):'Si festeggiano <b>30 anni</b>.';
+$('#hello').innerHTML=S.done?('Bentornato <b></b>! Il tuo invito ti aspetta.'):(S.nome?('Ciao <b></b>, sei convocato per i <b>30 anni</b> di Mery.'):'Si festeggiano <b>30 anni</b>.');
+if(S.done)$('#btnEnter').textContent='Apri il tuo invito';
 if(S.nome){var hb=$$('#hello b');hb[0].textContent=S.nome}
 $('#btnEnter').addEventListener('click',function(){
   var btn=this;btn.disabled=true;
@@ -1056,7 +1080,7 @@ $('#btnEnter').addEventListener('click',function(){
   Sfx.unlock();Sfx.startCrowd();Sfx.startMusic();Sfx.whistle();Sfx.swell(false);
   say(TX.benvenuto||'Benvenuti a Mery Arena!');
   var p0=$('#p0');if(!RM)p0.classList.add('go');
-  setTimeout(function(){go(1);p0.classList.remove('go')},RM?150:1000);
+  setTimeout(function(){go(S.done?6:1);p0.classList.remove('go')},RM?150:1000);
 });
 $('#voceBtn').addEventListener('click',function(){
   var on=!Voce.isOn();Voce.setOn(on);this.classList.toggle('off',!on);this.setAttribute('aria-pressed',on?'true':'false');
@@ -1144,7 +1168,7 @@ function drawBars(code){
   while(x<198){var w=1+Math.floor(r()*3),gap=1+Math.floor(r()*2);out+='<rect x="'+x+'" y="0" width="'+w+'" height="40" fill="#2a1c00"/>';x+=w+gap}
   svg.innerHTML=out;
 }
-S.codice=genCode();$('#tkCode').textContent=S.codice;drawBars(S.codice);
+S.codice=S.codice||genCode();$('#tkCode').textContent=S.codice;drawBars(S.codice);
 var seatGrid=$('#seatGrid');
 (function(){var h='';for(var n=1;n<=99;n++)h+='<button type="button" class="seat" data-n="'+n+'" aria-pressed="false">'+n+'</button>';seatGrid.innerHTML=h})();
 function isTaken(n){return S.taken.indexOf(n)>=0&&n!==S.mio}
@@ -1167,6 +1191,7 @@ function loadSeats(){
     paintSeats();
   });
 }
+if(!Net.on)$('#seatState').textContent='Scegli il numero che preferisci: Mery lo conferma quando le scrivi su WhatsApp.';
 if(Net.demo)$('#seatState').textContent='ANTEPRIMA (dati di prova che spariscono alla chiusura). Ogni numero è unico: quando qualcuno lo prende, diventa barrato.';
 seatGrid.addEventListener('click',function(e){var b=e.target.closest?e.target.closest('.seat'):null;if(!b||b.disabled)return;setSeat(b.getAttribute('data-n'));Sfx.pop()});
 $('#seatRand').addEventListener('click',function(){var f=freeNumbers();if(f.length){setSeat(pick(f));Sfx.pop()}});
@@ -1176,7 +1201,7 @@ guest.addEventListener('blur',function(){this.value=S.nome;if(Net.on&&S.nome)loa
 paintSeats();
 function runValidation(){
   var btn=$('#btnValida'),tkEl=$('#ticket');
-  guest.disabled=true;S.validated=true;paintSeats();
+  guest.disabled=true;S.validated=true;paintSeats();saveState();
   tkEl.classList.add('scanning');Sfx.laser();say('Controllo del biglietto in corso ai tornelli…');
   setTimeout(function(){
     tkEl.classList.add('valid');Sfx.thud();
@@ -1435,7 +1460,7 @@ var Shoot=(function(){
   ball.addEventListener('lostpointercapture',function(e){if(drag&&e.pointerId===drag.id){clearGuides();drag=null}});
 
   function finish(){
-    ended=true;var n=S.rigori,prevBest=S.best;S.best=Math.max(S.best,n);
+    ended=true;var n=S.rigori,prevBest=S.best;S.best=Math.max(S.best,n);saveState();
     $('#endNum').textContent=n+'/'+TOT;
     var m=n>=5?'PERFETTO! Sei un fenomeno':n>=3?'Che cecchino! Ti sei guadagnato un posto da titolare.':n>=1?'Non male! Qualche rigore in più e ti convocano in Nazionale.':'Zero gol, ma il pubblico ti applaude lo stesso.';
     $('#endMsg').textContent=m;
@@ -1581,7 +1606,7 @@ $('#form').addEventListener('submit',function(e){
   e.preventDefault();var er=$('#p5err'),btn=$('#form button[type=submit]');
   if(!S.nome){er.textContent='Scrivi il tuo nome.';rsvpName.focus();return}
   if(!S.presenza){er.textContent='Scegli: titolare, panchina o infortunato.';return}
-  if(!Net.on){Voce.say('distinta');go(6);return}
+  if(!Net.on){S.done=true;saveState();Voce.say('distinta');go(6);return}
   btn.disabled=true;er.textContent='Consegno la distinta…';
   Net.rsvp(payload()).then(function(r){
     btn.disabled=false;er.textContent='';
@@ -1590,7 +1615,7 @@ $('#form').addEventListener('submit',function(e){
       go(1);return;
     }
     if(!r||r.ok===false)toast('Distinta non salvata sul server: usa il bottone WhatsApp per confermare.',5000);
-    Voce.say('distinta');go(6);
+    S.done=true;saveState();Voce.say('distinta');go(6);
   });
 });
 
@@ -1706,6 +1731,7 @@ function countUp(){
   wrap.setAttribute('tabindex','0');wrap.setAttribute('role','button');wrap.setAttribute('aria-label','Figurina di Mery: premi per girarla');
   wrap.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();flipped=!flipped;flip.classList.toggle('flipped',flipped)}});
 })();
+$('#btnReset').addEventListener('click',function(){clearSaved();location.href=pageUrl()});
 $('#btnIcs').addEventListener('click',downloadIcs);
 $('#btnShare').addEventListener('click',share);
 
@@ -1717,7 +1743,7 @@ var ENTER={
   4:function(){revealTimeline()},
   5:function(){setHelpLinks();rsvpName.value=S.nome},
   6:function(){
-    $('#rcNome').textContent=S.nome||'-';$('#rcPres').textContent=PRES[S.presenza]||'-';$('#rcSeat').textContent=S.posto;$('#rcRig').textContent=S.best+'/'+TOT;$('#rcQuando').textContent=cap(D.giornoSettimana)+' '+D.giorno+' · '+D.oraInizio;
+    $('#rcNome').textContent=S.nome||'-';$('#rsNome').textContent=S.nome||'te';$('#rcPres').textContent=PRES[S.presenza]||'-';$('#rcSeat').textContent=S.posto;$('#rcRig').textContent=S.best+'/'+TOT;$('#rcQuando').textContent=cap(D.giornoSettimana)+' '+D.giorno+' · '+D.oraInizio;
     $('#rcRis').textContent=S.riserva?(S.riservaNome||'Sì'):'No';
     $('#frName').textContent=C.festeggiata||'Mery';$('#btnWa').href=waHref();$('#btnWa').hidden=!waNumber(); // bottone nascosto finché non c'è il numero in config.js
     countUp();tickCd();clearInterval(cdTimer);cdTimer=setInterval(tickCd,1000);
