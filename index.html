@@ -87,8 +87,20 @@ h1,h2,h3,p{margin:0}
 .clock{font-family:var(--f-disp);font-weight:700;font-size:17px;letter-spacing:.08em;font-variant-numeric:tabular-nums;
   padding:3px 10px;border-radius:4px;background:rgba(255,255,255,.1);border:1px solid var(--line)}
 .clock small{font-size:11px;color:var(--mute);margin-right:6px;letter-spacing:.12em}
-#mute{width:40px;height:34px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.1);font-size:18px;line-height:1;padding:0}
+#mute,#voceBtn{width:40px;height:34px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.1);font-size:18px;line-height:1;padding:0}
 
+.tools{display:flex;gap:6px;flex:none}
+#voceBtn{position:relative}
+#voceBtn.off{opacity:.55}
+#voceBtn.off::after{content:"";position:absolute;left:7px;right:7px;top:50%;height:2px;background:#ff6b6b;transform:rotate(-35deg)}
+@media (max-width:400px){
+  #bar{gap:5px;padding-left:calc(6px + var(--sal));padding-right:calc(6px + var(--sar))}
+  .clock small{display:none}.clock{padding:3px 8px;font-size:16px}
+  .tv{gap:5px}.tv b{padding:3px 7px;font-size:15px}.live{padding:3px 6px;font-size:12px}
+  #mute,#voceBtn{width:36px}
+  .tv b{white-space:nowrap}
+}
+@media (max-width:340px){.tv b{font-size:13px;padding:3px 5px}.live{font-size:11px}.clock{font-size:14px;padding:3px 5px}#mute,#voceBtn{width:32px}}
 /* ---------- ticker ---------- */
 #ticker{position:absolute;left:0;right:0;bottom:0;z-index:20;height:calc(var(--tick) + var(--sab));padding:0 var(--sar) var(--sab) var(--sal);
   display:flex;align-items:stretch;background:rgba(14,7,3,.94);border-top:2px solid var(--gold)}
@@ -468,7 +480,7 @@ textarea.in-txt{min-height:92px;resize:none}
   <header id="bar">
     <div class="tv"><b>MERY TV</b><span class="live"><i></i>LIVE</span></div>
     <div class="clock" id="clock" aria-label="Orologio di diretta"><small>1°T</small><span id="clockTxt">00:00</span></div>
-    <button id="mute" type="button" aria-label="Disattiva audio" aria-pressed="false">🔊</button>
+    <div class="tools"><button id="voceBtn" type="button" aria-label="Voce del telecronista: disattiva" aria-pressed="true" title="Voce del telecronista">🎙️</button><button id="mute" type="button" aria-label="Disattiva audio" aria-pressed="false">🔊</button></div>
   </header>
 
   <main id="stage">
@@ -967,18 +979,92 @@ function setHype(v){
   }else box.classList.remove('max');
 }
 
+/* =============================================================
+   TELECRONISTA VOCALE – Web Speech API nativa (gratis, nessun CDN)
+   Parte solo dopo il tap su «Entra nello stadio». Se non c'è una voce italiana resta muto senza errori.
+   ============================================================= */
+var Voce=(function(){
+  var cfg=C.telecronista||{},F=cfg.frasi||{},synth=window.speechSynthesis,
+      ok=!!(synth&&window.SpeechSynthesisUtterance),
+      voice=null,activated=false,userOn=true,muted=false,busy=false,current=null,queue=[],golCount=0,firstTried=false,watch=0,ticker=say;
+  var KEY={ingresso:1,fineAlta:1,fineBassa:1};          // con "riduci movimento" parla solo qui (+ primo gol)
+  var quando=D.giornoSettimana+' '+D.giorno+' alle '+(mm?(hh+' e '+mm):hh);
+  var luogoParlato=[L.nome,String(L.citta||'').replace(/\s*\(.*?\)\s*/g,'')].filter(Boolean).join(', ');
+  function pickVoice(){
+    if(!ok)return;var vs=[];try{vs=synth.getVoices()||[]}catch(e){}
+    var best=null,bs=-1;
+    vs.forEach(function(v){
+      if(!/^it/i.test(v.lang||''))return;
+      var sc=(/it[-_]IT/i.test(v.lang)?2:0)+(v.localService?1:0);if(sc>bs){bs=sc;best=v}
+    });
+    voice=best;
+  }
+  if(ok){pickVoice();try{if(synth.addEventListener)synth.addEventListener('voiceschanged',pickVoice);else synth.onvoiceschanged=pickVoice}catch(e){}}
+  function fmt(t,v){
+    v=v||{};
+    return String(t).replace(/\{nome\}/g,S.nome||'campione').replace(/\{x\}/g,v.x!=null?v.x:'').replace(/\{luogo\}/g,luogoParlato).replace(/\{quando\}/g,quando);
+  }
+  function parlaOra(txt){
+    var u;try{u=new SpeechSynthesisUtterance(txt)}catch(e){return}
+    u.lang=voice.lang||'it-IT';u.voice=voice;
+    u.volume=cfg.volume!=null?cfg.volume:0.9;u.rate=cfg.rate!=null?cfg.rate:1.05;u.pitch=cfg.pitch!=null?cfg.pitch:1.0;
+    current=u;busy=true;
+    u.onstart=function(){if(u!==current)return;clearTimeout(watch);ticker(txt)};   // il ticker mostra la stessa frase
+    var fine=function(){if(u!==current)return;current=null;busy=false;if(queue.length)parlaOra(queue.shift())};
+    u.onend=fine;u.onerror=fine;
+    console.log('[TELECRONISTA]',txt);
+    try{synth.speak(u)}catch(e){busy=false;current=null;return}
+    if(!firstTried){   // iOS può bloccare la prima frase se non parte da un gesto: avvisa e riprova al prossimo tocco
+      firstTried=true;
+      watch=setTimeout(function(){
+        if(current!==u)return;
+        toast('Tocca per attivare la voce',4000);
+        var retry=function(){document.removeEventListener('pointerdown',retry,true);if(!activated||muted||!userOn)return;try{synth.cancel()}catch(e){}current=null;busy=false;parlaOra(txt)};
+        document.addEventListener('pointerdown',retry,true);
+      },1800);
+    }
+  }
+  function stop(){queue.length=0;busy=false;current=null;clearTimeout(watch);if(ok){try{synth.cancel()}catch(e){}}}
+  return {
+    available:function(){return ok},
+    activate:function(){activated=true;if(ok&&!voice)pickVoice();if(!ok||!voice){var b=document.getElementById('voceBtn');if(b&&!ok)b.hidden=true}this.say('ingresso')},
+    setOn:function(v){userOn=!!v;if(!userOn)stop()},
+    isOn:function(){return userOn},
+    setMuted:function(m){muted=!!m;if(muted)stop()},
+    say:function(id,v){
+      var isGoal=(id==='gol'||id==='varOk'),first=false;
+      if(isGoal){first=(golCount===0);golCount++}
+      var t=F[id];if(!t||!ok||!activated||!userOn||muted)return;
+      if(RM&&!KEY[id]&&!(isGoal&&first))return;                 // reduced-motion: solo eventi chiave
+      if(!voice){pickVoice();if(!voice)return}                  // nessuna voce italiana: muto, nessun errore
+      var txt=fmt(t,v);
+      if(id==='gol'){                                           // GOOOOL interrompe tutto
+        stop();setTimeout(function(){if(!muted&&userOn)parlaOra(txt)},RM?0:60);return;
+      }
+      if(!busy){parlaOra(txt);return}
+      if(queue.length>=2)queue.shift();queue.push(txt);         // massimo 2 frasi in coda
+    }
+  };
+})();
+
 /* ---------- FASE 0 ---------- */
 $('#hello').innerHTML=S.nome?('Ciao <b></b>, sei convocato per i <b>30 anni</b> di Mery.'):'Si festeggiano <b>30 anni</b>.';
 if(S.nome){var hb=$$('#hello b');hb[0].textContent=S.nome}
 $('#btnEnter').addEventListener('click',function(){
   var btn=this;btn.disabled=true;
+  Voce.activate();
   Sfx.unlock();Sfx.startCrowd();Sfx.startMusic();Sfx.whistle();Sfx.swell(false);
   say(TX.benvenuto||'Benvenuti a Mery Arena!');
   var p0=$('#p0');if(!RM)p0.classList.add('go');
   setTimeout(function(){go(1);p0.classList.remove('go')},RM?150:1000);
 });
+$('#voceBtn').addEventListener('click',function(){
+  var on=!Voce.isOn();Voce.setOn(on);this.classList.toggle('off',!on);this.setAttribute('aria-pressed',on?'true':'false');
+  this.setAttribute('aria-label','Voce del telecronista: '+(on?'disattiva':'attiva'));
+  if(on)toast('Voce attiva');else toast('Voce disattivata');
+});
 $('#mute').addEventListener('click',function(){
-  var m=!Sfx.isMuted();Sfx.setMuted(m);
+  var m=!Sfx.isMuted();Sfx.setMuted(m);Voce.setMuted(m);
   if(!m){Sfx.unlock();Sfx.startCrowd();Sfx.startMusic();Sfx.pop()}
   this.textContent=m?'🔇':'🔊';this.setAttribute('aria-pressed',m?'true':'false');this.setAttribute('aria-label',m?'Attiva audio':'Disattiva audio');
 });
@@ -1152,7 +1238,7 @@ var Shoot=(function(){
     if(!preloaded){preloaded=true;Object.keys(POSE).forEach(function(n){var i=new Image();i.src='assets/portiere-'+n+'.webp'})}
     pose('pronto');
     if(S.tiri===0){setHype(12);}
-    if(!announced){announced=true}
+    if(!announced){announced=true;Voce.say('inizioRigori')}
   }
   function reset(){
     ball.style.transition='none';ball.style.transform='none';ball.classList.remove('hide');
@@ -1231,7 +1317,7 @@ var Shoot=(function(){
       var doVar=rand()<VAR_PROB;
       function confirmGoal(viaVar){
         applyResult(kind,true);goal.classList.remove('bulge');void goal.offsetWidth;goal.classList.add('bulge');
-        goldFlash();fxText('GOOOOL!','#ffe38a',S.nome||'');Sfx.swell(true);Sfx.fanfare();
+        goldFlash();fxText('GOOOOL!','#ffe38a',S.nome||'');Sfx.swell(true);Sfx.fanfare();Voce.say(viaVar?'varOk':'gol');
         say(pick(TX.gol||['Gol!']));setHype(S.hype+28+pw*8);
         nextShot(1900);
       }
@@ -1242,6 +1328,7 @@ var Shoot=(function(){
         var ok=rand()<(1-VAR_ANNULLA),why=VAR_MOTIVI[varIdx++%VAR_MOTIVI.length];
         v.classList.add(ok?'ok':'ko');$('#varTxt').textContent=ok?'Gol confermato':'Gol annullato';$('#varWhy').textContent=ok?'':'Motivo: '+why;Sfx.varBeep(ok?1:2);
         say(ok?pick(TX.varOk||['Gol confermato']):(pick(TX.varKo||['Gol annullato'])+' ('+why+')'));
+        if(!ok)Voce.say('varKo');
         setTimeout(function(){
           v.className='';
           if(ok)confirmGoal(true);
@@ -1251,15 +1338,15 @@ var Shoot=(function(){
       return;
     }
     if(kind==='parata'){
-      applyResult(kind,false);fxText('Parata!','#f0d9a6');Sfx.save();say(pick(TX.parata||['Parata!']));setHype(S.hype-4);
+      applyResult(kind,false);fxText('Parata!','#f0d9a6');Sfx.save();Voce.say('parata');say(pick(TX.parata||['Parata!']));setHype(S.hype-4);
       ball.style.transition='transform .35s ease-out';
       var m=ball.style.transform;ball.style.transform=m.replace(/translate\(([-\d.]+)px,([-\d.]+)px\)/,function(a,x,y){return 'translate('+(+x+(rand()<0.5?-1:1)*60)+'px,'+(+y+70)+'px)'});
     }else if(kind==='traversa'){
-      applyResult(kind,false);fxText('Traversa!','#ffe38a');Sfx.clang();say(pick(TX.traversa||['Traversa!']));setHype(S.hype+3);
+      applyResult(kind,false);fxText('Traversa!','#ffe38a');Sfx.clang();Voce.say('traversa');say(pick(TX.traversa||['Traversa!']));setHype(S.hype+3);
       ball.style.transition='transform .5s cubic-bezier(.3,.1,.6,1)';
       var m2=ball.style.transform;ball.style.transform=m2.replace(/translate\(([-\d.]+)px,([-\d.]+)px\)/,function(a,x,y){return 'translate('+(+x)+'px,'+(+y+G.gh*0.9)+'px)'});
     }else{
-      applyResult(kind,false);fxText('Fuori!','#ff8da3');Sfx.swell(false);say(pick(TX.fuori||['Fuori!']));setHype(S.hype-6);
+      applyResult(kind,false);fxText('Fuori!','#ff8da3');Sfx.swell(false);Voce.say('fuori');say(pick(TX.fuori||['Fuori!']));setHype(S.hype-6);
       ball.classList.add('hide');
     }
     nextShot(next);
@@ -1358,6 +1445,7 @@ var Shoot=(function(){
     $('#btnRetry').textContent='Ritenta la serie';retryArmed=false;
     if(Net.on){$('#lbWrap').hidden=false;renderLb($('#lbEnd'),null);Net.rigori(S.nome,S.best).then(function(r){if(r&&r.classifica)renderLb($('#lbEnd'),r.classifica,50);else $('#lbEnd').innerHTML='<li class="lb-empty">Classifica non raggiungibile ora.</li>'})}
     if(n>=4){Sfx.fanfare();Sfx.swell(true);confetti()}else if(n>=3){Sfx.fanfare()}
+    Voce.say(n>=4?'fineAlta':'fineBassa',{x:n});
     say('Fine della serie: '+n+' rigori segnati su '+TOT+'.');
   }
   $('#btnRetry').addEventListener('click',function(){
@@ -1412,7 +1500,7 @@ var Scratch=(function(){
   function finish(){
     if(done)return;done=true;cv.classList.add('gone');
     $('#scratchHint').textContent='Ecco dove si gioca! 🎉';$('#btnSkipScratch').hidden=true;$('#btnToCareer').hidden=false;
-    Sfx.fanfare();Sfx.swell(true);vib([30,50,30,50,120]);say('Scoperto! Si gioca a '+luogoNome+'. Il calcio d\'inizio è '+dataBreve+', '+oraTxt+'.');
+    Sfx.fanfare();Sfx.swell(true);vib([30,50,30,50,120]);Voce.say('gratta');say('Scoperto! Si gioca a '+luogoNome+'. Il calcio d\'inizio è '+dataBreve+', '+oraTxt+'.');
     confetti();
   }
   function check(force){
@@ -1493,7 +1581,7 @@ $('#form').addEventListener('submit',function(e){
   e.preventDefault();var er=$('#p5err'),btn=$('#form button[type=submit]');
   if(!S.nome){er.textContent='Scrivi il tuo nome.';rsvpName.focus();return}
   if(!S.presenza){er.textContent='Scegli: titolare, panchina o infortunato.';return}
-  if(!Net.on){go(6);return}
+  if(!Net.on){Voce.say('distinta');go(6);return}
   btn.disabled=true;er.textContent='Consegno la distinta…';
   Net.rsvp(payload()).then(function(r){
     btn.disabled=false;er.textContent='';
@@ -1502,7 +1590,7 @@ $('#form').addEventListener('submit',function(e){
       go(1);return;
     }
     if(!r||r.ok===false)toast('Distinta non salvata sul server: usa il bottone WhatsApp per confermare.',5000);
-    go(6);
+    Voce.say('distinta');go(6);
   });
 });
 

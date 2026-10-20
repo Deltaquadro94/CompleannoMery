@@ -89,6 +89,27 @@ window.CONFIG = {
     { anno: "2026", titolo: "30 anni: fischio d'inizio", testo: "Il tabellino dice 30. La partita più bella è ancora da giocare." }
   ],
 
+  /* ---------- TELECRONISTA VOCALE (Web Speech API del browser, gratis, nessun servizio esterno) ----------
+     volume 0-1, rate (velocità) 0.1-10, pitch (tono) 0-2. Segnaposto: {nome} {x} {luogo} {quando}.
+     Se il telefono non ha una voce italiana il telecronista resta muto, senza errori. */
+  telecronista: {
+    volume: 0.9, rate: 1.05, pitch: 1.0,
+    frasi: {
+      ingresso: "Benvenuti allo stadio! È una bellissima giornata per la finale di Champions... e per festeggiare il compleanno di Mery!",
+      inizioRigori: "Mery in campo! Pronti per la serie di cinque rigori?",
+      gol: "GOOOOL! Che tiro, {nome}!",
+      parata: "Parata incredibile del portiere!",
+      traversa: "Traversa! Che sfortuna!",
+      fuori: "Fuori di poco!",
+      varOk: "Il VAR conferma: gol valido!",
+      varKo: "Il VAR annulla! Niente gol!",
+      fineAlta: "Che campione! {nome} chiude con {x} gol!",
+      fineBassa: "Serie conclusa: {x} gol su cinque. Si può migliorare!",
+      gratta: "Ed ecco il luogo segreto: {luogo}!",
+      distinta: "Confermato! Ci vediamo {quando}!"
+    }
+  },
+
   /* ---------- TELECRONACA (ticker in basso) ---------- */
   telecronaca: {
     benvenuto: "Benvenuti a Mery Arena: sabato a mezzogiorno si festeggiano i 30 anni di Mery!",
