@@ -8,7 +8,7 @@
 <meta name="description" content="Sei convocato! Entra nello stadio, segna i rigori e conferma la presenza ai 30 anni di Mery.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="MERY ARENA – Sei convocato ai 30 anni di Mery!">
-<meta property="og:description" content="Serata Champions: entra nello stadio, tira i rigori e conferma la presenza.">
+<meta property="og:description" content="Festa Champions: entra nello stadio, tira i rigori e conferma la presenza.">
 <meta property="og:image" content="https://deltaquadro94.github.io/compleannomery/assets/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -17,7 +17,7 @@
 <style>
 /* =============================================================
    MERY ARENA – stili
-   Concetto: diretta TV serale. Blu notte + oro Champions + rosso LIVE.
+   Concetto: diretta TV allo stadio. Marrone cioccolato + oro Champions + rosso LIVE.
    ============================================================= */
 :root{
   --navy:#1a0e07; --navy2:#2b170b; --blue:#8a5a24; --azure:#c58a3a; --cyan:#f0d9a6;
@@ -369,7 +369,7 @@ textarea.in-txt{min-height:92px;resize:none}
 .sub a{color:var(--cyan)}
 
 
-/* ---------- mezzanotte, posti, +1, classifica ---------- */
+/* ---------- nota compleanno, posti, +1, classifica ---------- */
 .tk-mid{font-size:12.5px;font-weight:700;text-align:center;background:rgba(42,28,0,.14);border-radius:8px;padding:5px 8px;line-height:1.25}
 .seatpick{display:flex;align-items:center;gap:12px;justify-content:center}
 .seatpick .num{font-family:var(--f-disp);font-weight:800;font-size:46px;color:var(--gold);min-width:64px;text-align:center;font-variant-numeric:tabular-nums}
@@ -450,9 +450,9 @@ textarea.in-txt{min-height:92px;resize:none}
     <section class="phase active" id="p0" aria-label="Ingresso allo stadio">
       <div class="tunnel" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
       <div class="p0-copy">
-        <p class="kicker">Diretta · Serata Champions</p>
+        <p class="kicker">Diretta · Festa Champions</p>
         <h1 class="logo"><span class="t1">Mery</span><span class="t2">Arena</span></h1>
-        <p class="hello" id="hello">Stasera si festeggiano <b>30 anni</b>.</p>
+        <p class="hello" id="hello">Si festeggiano <b>30 anni</b>.</p>
         <button class="btn pulse" id="btnEnter" type="button">Entra nello stadio</button>
         <p class="hint">🔊 Tocca per attivare l'audio (puoi toglierlo col tasto in alto)</p>
       </div>
@@ -468,7 +468,7 @@ textarea.in-txt{min-height:92px;resize:none}
             <div class="tk-ucl">Golden Ticket · Mery Arena</div>
             <div class="tk-title" id="tkTitle">Mery – 30° compleanno party</div>
             <div class="tk-when" id="tkWhen"></div>
-            <div class="tk-mid" id="tkMid"></div>
+            <div class="tk-mid" id="tkNota"></div>
             <div class="tk-guest"><label for="guestName">Ospite</label><input id="guestName" type="text" maxlength="30" autocomplete="given-name" autocapitalize="words" placeholder="Il tuo nome"></div>
             <div class="tk-grid">
               <div><span>Settore</span><b>MERY</b></div>
@@ -537,7 +537,7 @@ textarea.in-txt{min-height:92px;resize:none}
               <h3 id="rvLuogo"></h3>
               <p id="rvAddr"></p>
               <div class="when" id="rvData"></div>
-              <p class="mid" id="rvMid"></p>
+              <p class="mid" id="rvNota"></p>
             </div>
             <canvas id="foil" aria-label="Gratta con il dito per scoprire il luogo"></canvas>
           </div>
@@ -604,7 +604,7 @@ textarea.in-txt{min-height:92px;resize:none}
               <div class="bk-r"><b>Dove</b><span id="bkWhere"></span></div>
               <div class="bk-r"><b>Dress code</b><span id="bkDress"></span></div>
               <div class="bk-r"><b>Programma</b><span id="bkProg"></span></div>
-              <div class="bk-r"><b>Mezzanotte</b><span id="bkMid"></span></div>
+              <div class="bk-r"><b>Compleanno</b><span id="bkNota"></span></div>
               <div class="holo"></div><div class="shine"></div>
             </div>
           </div></div>
@@ -617,7 +617,7 @@ textarea.in-txt{min-height:92px;resize:none}
           <div><span>Posto n°</span><b id="rcSeat">-</b></div>
           <div><span>Rigori (record)</span><b id="rcRig">-</b></div>
           <div><span>Riserva (+1)</span><b id="rcRis">-</b></div>
-          <div><span>Brindisi</span><b>Mezzanotte</b></div>
+          <div><span>Festa</span><b id="rcQuando">-</b></div>
         </div>
 
         <div class="cd glass" id="cd"><div class="lbl">Calcio d'inizio tra</div>
@@ -629,7 +629,7 @@ textarea.in-txt{min-height:92px;resize:none}
           <div><span>Dove</span><b id="dtWhere"></b></div>
           <div><span>Dress code</span><b id="dtDress"></b></div>
           <div><span>Programma</span><b id="dtProg"></b></div>
-          <div><span>Mezzanotte</span><b id="dtMid"></b></div>
+          <div><span>Compleanno</span><b id="dtNota"></b></div>
         </div>
 
         <div class="lbcard glass" id="lbCard" hidden>
@@ -668,7 +668,8 @@ var RM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matc
 var rand=Math.random, clamp=function(v,a,b){return Math.max(a,Math.min(b,v))};
 var pick=function(a){return a[Math.floor(rand()*a.length)]};
 var pad=function(n){return String(n).padStart(2,'0')};
-var GIORNI=['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
+var GIORNI=['domenica','lunedi','martedi','mercoledi','giovedi','venerdi','sabato'];
+var accenta=function(g){return g.replace(/^(lune|marte|mercole|giove|vener)di$/,'$1dì')};
 var MESI=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
 var norm=function(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim()};
 var cap=function(s){return s.charAt(0).toUpperCase()+s.slice(1)};
@@ -682,7 +683,7 @@ function guard(){
   if(isNaN(t)||t.getUTCMonth()!==d.mese-1||t.getUTCDate()!==d.giorno) return 'La data '+d.giorno+'/'+d.mese+'/'+d.anno+' non esiste.';
   var real=GIORNI[t.getUTCDay()];
   if(norm(real)!==norm(d.giornoSettimana))
-    return 'In config.js il '+d.giorno+'/'+d.mese+'/'+d.anno+' è indicato come «'+d.giornoSettimana+'», ma nel calendario è '+real+'. Correggi il giorno della settimana o la data.';
+    return 'In config.js il '+d.giorno+'/'+d.mese+'/'+d.anno+' è indicato come «'+d.giornoSettimana+'», ma nel calendario è '+accenta(real)+'. Correggi il giorno della settimana o la data.';
   if(!/^\d{1,2}:\d{2}$/.test(d.oraInizio||'')) return 'oraInizio deve essere nel formato HH:MM.';
   if(d.oraFine&&!/^\d{1,2}:\d{2}$/.test(d.oraFine)) return 'oraFine deve essere vuota oppure nel formato HH:MM.';
   return '';
@@ -695,9 +696,9 @@ var C=window.CONFIG, D=C.data, L=C.luogo||{}, FG=C.figurina||{}, TX=C.telecronac
 var hh=+D.oraInizio.split(':')[0], mm=+D.oraInizio.split(':')[1];
 var dataLunga=cap(D.giornoSettimana)+' '+D.giorno+' '+MESI[D.mese-1]+' '+D.anno;
 var dataBreve=cap(D.giornoSettimana)+' '+D.giorno+' '+MESI[D.mese-1];
-var oraTxt=D.oraFine?('dalle '+D.oraInizio+' alle '+D.oraFine):('dalle '+D.oraInizio+' in poi');
+var oraTxt=D.oraFine?('dalle '+D.oraInizio+' alle '+D.oraFine):('ore\u00a0'+D.oraInizio);
 var luogoNome=L.nome||'';
-var NOTA=C.notaMezzanotte||'';
+var NOTA=C.notaCompleanno||'';
 var luogoRiga=[L.nome,L.indirizzo,L.citta].filter(Boolean).join(', ');
 var mapsHref=L.mapsUrl||('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent([L.nome,L.indirizzo,L.citta].filter(Boolean).join(' ')));
 function romeOffsetMin(y,m,d){ // CEST (+120) dall'ultima domenica di marzo a quella di ottobre, altrimenti CET (+60)
@@ -934,7 +935,7 @@ function setHype(v){
 }
 
 /* ---------- FASE 0 ---------- */
-$('#hello').innerHTML=S.nome?('Ciao <b></b>, sei convocato per i <b>30 anni</b> di Mery.'):'Stasera si festeggiano <b>30 anni</b>.';
+$('#hello').innerHTML=S.nome?('Ciao <b></b>, sei convocato per i <b>30 anni</b> di Mery.'):'Si festeggiano <b>30 anni</b>.';
 if(S.nome){var hb=$$('#hello b');hb[0].textContent=S.nome}
 $('#btnEnter').addEventListener('click',function(){
   var btn=this;btn.disabled=true;
@@ -1008,8 +1009,8 @@ function renderLb(ol,list,limit){
 
 /* ---------- FASE 1: biglietto ---------- */
 var guest=$('#guestName');
-$('#tkWhen').textContent=dataBreve+' · ore '+D.oraInizio+' in poi';
-$('#tkMid').textContent=NOTA;$('#tkMid').hidden=!NOTA;
+$('#tkWhen').textContent=dataLunga+' · '+oraTxt;
+$('#tkNota').textContent=NOTA;$('#tkNota').hidden=!NOTA;
 $('#tkTitle').textContent=(C.festeggiata||'Mery')+' – '+(C.eta||30)+'° compleanno party';
 function genCode(){
   var al='ABCDEFGHJKMNPQRSTUVWXYZ23456789',a=new Uint8Array(8);
@@ -1292,8 +1293,8 @@ var Shoot=(function(){
 /* ---------- FASE 3: gratta e vinci ---------- */
 $('#rvLuogo').textContent=luogoNome;
 $('#rvAddr').textContent=[L.indirizzo,L.citta].filter(Boolean).join(' · ');
-$('#rvData').textContent=dataBreve+' · '+oraTxt;
-$('#rvMid').textContent=NOTA;$('#rvMid').hidden=!NOTA;
+$('#rvData').textContent=dataLunga+' · '+oraTxt;
+$('#rvNota').textContent=NOTA;$('#rvNota').hidden=!NOTA;
 var Scratch=(function(){
   var cv=$('#foil'),ctx=cv.getContext('2d',{willReadFrequently:true}),box=$('#scratchBox'),w=0,h=0,dpr=1,drawing=false,lp=null,done=false,lastChk=0,lastFb=0;
   function paint(){
@@ -1452,7 +1453,7 @@ function buildIcs(){
     'DTSTART;TZID=Europe/Rome:'+st,'DTEND;TZID=Europe/Rome:'+en,
     'SUMMARY:'+esc((C.festeggiata||'Mery')+' – '+(C.eta||30)+'° compleanno (Mery Arena)'),
     'LOCATION:'+esc(luogoRiga),'DESCRIPTION:'+esc(desc),
-    'BEGIN:VALARM','TRIGGER:-PT3H','ACTION:DISPLAY','DESCRIPTION:Stasera si va allo stadio!','END:VALARM',
+    'BEGIN:VALARM','TRIGGER:-PT3H','ACTION:DISPLAY','DESCRIPTION:Oggi si va allo stadio: calcio d\'inizio alle '+D.oraInizio+'!','END:VALARM',
     'END:VEVENT','END:VCALENDAR'].join('\r\n');
 }
 function downloadIcs(){
@@ -1497,8 +1498,8 @@ function countUp(){
   if(FG.foto)$('#frPhoto').src=FG.foto;
   var h='';(FG.stats||[]).forEach(function(s){h+='<div><b>0</b><span></span></div>'});
   var st=$('#frStats');st.innerHTML=h;$$('#frStats span').forEach(function(sp,i){sp.textContent=FG.stats[i].sigla});
-  $('#bkWhen').textContent=dataLunga+' · '+oraTxt;$('#bkWhere').textContent=luogoRiga;$('#bkDress').textContent=C.dressCode||'';$('#bkProg').textContent=C.programma||'';$('#bkMid').textContent=NOTA;
-  $('#dtWhen').textContent=dataLunga+' · '+oraTxt;$('#dtWhere').textContent=luogoRiga;$('#dtDress').textContent=C.dressCode||'';$('#dtProg').textContent=C.programma||'';$('#dtMid').textContent=NOTA;
+  $('#bkWhen').textContent=dataLunga+' · '+oraTxt;$('#bkWhere').textContent=luogoRiga;$('#bkDress').textContent=C.dressCode||'';$('#bkProg').textContent=C.programma||'';$('#bkNota').textContent=NOTA;
+  $('#dtWhen').textContent=dataLunga+' · '+oraTxt;$('#dtWhere').textContent=luogoRiga;$('#dtDress').textContent=C.dressCode||'';$('#dtProg').textContent=C.programma||'';$('#dtNota').textContent=NOTA;
   $('#btnMap').href=mapsHref;$('#lnkGcal').href=gcalHref();
 })();
 (function cardInteraction(){
@@ -1535,7 +1536,7 @@ var ENTER={
   4:function(){revealTimeline()},
   5:function(){rsvpName.value=S.nome},
   6:function(){
-    $('#rcNome').textContent=S.nome||'-';$('#rcPres').textContent=PRES[S.presenza]||'-';$('#rcSeat').textContent=S.posto;$('#rcRig').textContent=S.best+'/'+TOT;
+    $('#rcNome').textContent=S.nome||'-';$('#rcPres').textContent=PRES[S.presenza]||'-';$('#rcSeat').textContent=S.posto;$('#rcRig').textContent=S.best+'/'+TOT;$('#rcQuando').textContent=cap(D.giornoSettimana)+' '+D.giorno+' · '+D.oraInizio;
     $('#rcRis').textContent=S.riserva?(S.riservaNome||'Sì'):'No';
     $('#frName').textContent=C.festeggiata||'Mery';$('#btnWa').href=waHref();$('#btnWa').hidden=!waNumber(); // bottone nascosto finché non c'è il numero in config.js
     countUp();tickCd();clearInterval(cdTimer);cdTimer=setInterval(tickCd,1000);

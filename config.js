@@ -15,18 +15,18 @@ window.CONFIG = {
      si blocca con un messaggio d'errore (guard-rail) invece di mostrare date sbagliate.
      giorno/mese/anno sono numeri (mese 1-12). Orari in formato "HH:MM" (ora italiana). */
   data: {
-    giornoSettimana: "giovedì",
-    giorno: 22,
+    giornoSettimana: "sabato",
+    giorno: 24,
     mese: 10,
     anno: 2026,
-    oraInizio: "21:30",
-    oraFine: "",          // lascia "" per "in poi" (nessuna fine fissata)
-    durataIcsOre: 4       // usata solo nel file calendario se oraFine è vuota (21:30 + 4h = 01:30)
+    oraInizio: "12:00",   // mezzogiorno esatto
+    oraFine: "",          // lascia "" se non c'è un orario di fine
+    durataIcsOre: 4       // usata solo nel file calendario se oraFine è vuota (12:00 + 4h = 16:00)
   },
 
-  /* ---------- MEZZANOTTE ----------
+  /* ---------- NOTA SUL COMPLEANNO ----------
      Frase mostrata su biglietto, dettagli, gratta-e-vinci, figurina e calendario. */
-  notaMezzanotte: "Si aspetta la mezzanotte: il compleanno scatta alle 00:00 del 23 ottobre! 🥂",
+  notaCompleanno: "Il compleanno di Mery è il 23 ottobre, ma festeggiamo insieme sabato 24 ottobre a mezzogiorno. 🥂",
 
   /* ---------- LUOGO ---------- */
   luogo: {
@@ -52,7 +52,7 @@ window.CONFIG = {
      "demo" = solo per anteprime: dati finti in memoria. */
   scriptUrl: "",
 
-  /* ---------- DETTAGLI SERATA ---------- */
+  /* ---------- DETTAGLI FESTA ---------- */
   dressCode: "Festivo & Casual",
   programma: "Calcio, amici e tanto cioccolato",
 
@@ -90,12 +90,12 @@ window.CONFIG = {
 
   /* ---------- TELECRONACA (ticker in basso) ---------- */
   telecronaca: {
-    benvenuto: "Benvenuti a Mery Arena: calcio d'inizio alle 21:30, ma il vero fischio è a mezzanotte, quando Mery compie 30 anni!",
+    benvenuto: "Benvenuti a Mery Arena: sabato a mezzogiorno si festeggiano i 30 anni di Mery!",
     inattivo: [
       "Sugli spalti si respira aria di festa grande.",
       "Il pubblico è carico: manca solo la festeggiata al centro del campo.",
       "Dalla regia: cioccolato in abbondanza, previsto in area di rigore.",
-      "Clima perfetto per una serata da Champions."
+      "Clima perfetto per una festa da Champions."
     ],
     gol: ["GOOOL! Che rigore, Mery sarebbe fiera!", "Rete! Il portiere resta a guardare.", "Palla in rete, esplode lo stadio!"],
     parata: ["Parata! Il portiere ci arriva con la punta dei guanti.", "Para tutto: che riflessi!", "Niente da fare, il portiere ha letto il tiro."],

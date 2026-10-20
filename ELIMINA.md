@@ -1,8 +1,8 @@
 # Eliminare il sito dopo la festa
 
-Dopo il 22 ottobre 2026 il sito e la repo (che contiene il numero WhatsApp per le conferme) vanno rimossi.
+Dopo la festa (sabato 24 ottobre 2026), da **domenica 25/10/2026**, il sito e la repo (che contiene il numero WhatsApp per le conferme) vanno rimossi.
 
-1. **Verifica che la festa sia passata** (giovedì 22 ottobre 2026) e di aver salvato eventuali conferme/messaggi che ti servono.
+1. **Verifica che la festa sia passata** (sabato 24 ottobre 2026) e di aver salvato eventuali conferme/messaggi che ti servono.
 2. Apri la repo su GitHub → **Settings**.
 3. Scorri fino a **Danger Zone** → **Delete this repository** → conferma digitando il nome della repo.
 4. **Verifica il 404:** apri il link del sito (o `curl -I https://deltaquadro94.github.io/compleannomery/`):

@@ -2,6 +2,8 @@
 
 Sito 100% statico (`index.html` + `config.js` + `assets/`). Nessuna build, nessun CDN.
 
+**Evento:** sabato 24 ottobre 2026, ore 12:00 (Villa Giovanna, Ottaviano).
+
 ## Come si modifica
 Tutto si cambia in **`config.js`** (commenti in italiano):
 
