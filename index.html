@@ -398,6 +398,8 @@ textarea.in-txt{min-height:92px;resize:none}
 .lbhead{display:flex;justify-content:space-between;align-items:center}
 .reveal .mid{font-size:12.5px;font-weight:700;line-height:1.25;max-width:30ch}
 .endcard{max-height:90%;overflow-y:auto}
+.helpwa{font-size:13px;color:var(--mute);text-decoration:underline;text-align:center;padding:8px 6px}
+.helpwa[hidden]{display:none}
 
 /* ---------- toast ---------- */
 #toast{position:absolute;left:50%;bottom:calc(var(--tick) + var(--sab) + 18px);transform:translate(-50%,20px);z-index:40;max-width:min(92%,380px);padding:11px 16px;border-radius:12px;
@@ -490,6 +492,7 @@ textarea.in-txt{min-height:92px;resize:none}
         <p class="err" id="p1err" role="alert"></p>
         <button class="btn" id="btnValida" type="button">Valida il biglietto</button>
         <button class="btn" id="btnToShoot" type="button" hidden>Vai ai rigori ⚽</button>
+        <a class="helpwa" id="helpWa1" href="#" target="_blank" rel="noopener" hidden>Problemi? Scrivi a Mery su WhatsApp</a>
       </div>
     </section>
 
@@ -581,6 +584,7 @@ textarea.in-txt{min-height:92px;resize:none}
           <p class="err" id="p5err" role="alert"></p>
           <button class="btn block" type="submit">Consegna la distinta</button>
         </form>
+        <a class="helpwa" id="helpWa5" href="#" target="_blank" rel="noopener" hidden>Problemi? Scrivi a Mery su WhatsApp</a>
       </div>
     </section>
 
@@ -1433,6 +1437,14 @@ function waText(){
   if(S.msg)l.push('💬 Messaggio: '+S.msg);
   return l.join('\n');
 }
+function helpHref(){
+  var n=waNumber();if(!n)return '';
+  return 'https://wa.me/'+n+'?text='+encodeURIComponent('Ciao Mery, sono '+(S.nome||'un ospite')+', ho un problema con l\'invito: ');
+}
+function setHelpLinks(){
+  ['helpWa1','helpWa5'].forEach(function(id){var a=document.getElementById(id);if(!a)return;var h=helpHref();a.hidden=!h;if(h)a.href=h});
+}
+['helpWa1','helpWa5'].forEach(function(id){var a=document.getElementById(id);if(a)a.addEventListener('click',function(){var h=helpHref();if(h)this.href=h})});
 function waHref(){var n=waNumber();return 'https://wa.me/'+(n?n:'')+'?text='+encodeURIComponent(waText())}
 function pageUrl(){return location.href.split('#')[0].split('?')[0]}
 function icsDate(y,m,d,H,M){return y+pad(m)+pad(d)+'T'+pad(H)+pad(M)+'00'}
@@ -1530,11 +1542,11 @@ $('#btnShare').addEventListener('click',share);
 
 /* ---------- hook d'ingresso fase ---------- */
 var ENTER={
-  1:function(){guest.value=S.nome;loadSeats();if(!S.nome){try{guest.focus({preventScroll:true})}catch(e){}}},
+  1:function(){setHelpLinks();guest.value=S.nome;loadSeats();if(!S.nome){try{guest.focus({preventScroll:true})}catch(e){}}},
   2:function(){Shoot.enter()},
   3:function(){Scratch.init()},
   4:function(){revealTimeline()},
-  5:function(){rsvpName.value=S.nome},
+  5:function(){setHelpLinks();rsvpName.value=S.nome},
   6:function(){
     $('#rcNome').textContent=S.nome||'-';$('#rcPres').textContent=PRES[S.presenza]||'-';$('#rcSeat').textContent=S.posto;$('#rcRig').textContent=S.best+'/'+TOT;$('#rcQuando').textContent=cap(D.giornoSettimana)+' '+D.giorno+' · '+D.oraInizio;
     $('#rcRis').textContent=S.riserva?(S.riservaNome||'Sì'):'No';

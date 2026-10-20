@@ -11,7 +11,7 @@ Tutto si cambia in **`config.js`** (commenti in italiano):
 |---|---|
 | Data / ora / giorno della settimana | `data` |
 | Luogo, indirizzo, link Google Maps | `luogo` |
-| Numero WhatsApp conferme | `whatsappNumero` (oppure `whatsappNumeroB64`) |
+| Numero WhatsApp conferme | `whatsappNumeroB64` (codificato in base64) |
 | Salvataggio su Google Fogli | `scriptUrl` (vuoto = disattivato) |
 | Dress code e programma | `dressCode`, `programma` |
 | Statistiche e foto della figurina | `figurina` |
@@ -64,8 +64,8 @@ Con `scriptUrl: ""` tutto resta locale: i numeri **non** sono unici e la classif
 ## Numero WhatsApp e repo pubblica
 Finché `whatsappNumero` e `whatsappNumeroB64` sono vuoti, il bottone «Conferma su WhatsApp» resta **nascosto**; appare da solo appena inserisci il numero.
 
-Il numero finisce nel codice pubblico (è necessario per il bottone di conferma). Per non averlo in chiaro
-puoi usare la versione codificata: `whatsappNumeroB64: "<risultato di btoa('39XXXXXXXXXX')>"`.
+Il numero finisce nel codice pubblico (è necessario per il bottone di conferma), quindi è salvato **solo codificato**:
+`whatsappNumeroB64: "<risultato di btoa('39XXXXXXXXXX')>"` e `whatsappNumero` resta vuoto.
 Non è segreto (chi apre il sito può ricavarlo), ma evita i bot che cercano numeri nel testo dei repo.
 
 ## Musica e portiere

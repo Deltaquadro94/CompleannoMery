@@ -38,12 +38,13 @@ window.CONFIG = {
   },
 
   /* ---------- CONFERME WHATSAPP ----------
-     Numero in formato internazionale senza + e senza spazi: 39XXXXXXXXXX.
-     Il repo è pubblico: per evitare che i bot lo trovino con una ricerca testuale
-     puoi usare la versione codificata (whatsappNumeroB64 = btoa("39XXXXXXXXXX")).
-     Se entrambi sono vuoti, il bottone apre WhatsApp e fa scegliere il contatto. */
+     Il repo è pubblico: il numero è salvato SOLO codificato (base64) per evitare che i bot
+     lo trovino con una ricerca testuale. Formato internazionale senza + né spazi.
+     Per cambiarlo: whatsappNumeroB64 = btoa("39XXXXXXXXXX") (console del browser).
+     (whatsappNumero in chiaro funziona ma va lasciato VUOTO nel repo pubblico.)
+     Se entrambi sono vuoti i bottoni WhatsApp spariscono. */
   whatsappNumero: "",
-  whatsappNumeroB64: "",
+  whatsappNumeroB64: "MzkzNjYxNTczMTEx",
 
   /* ---------- SERVER POSTI / DISTINTA / CLASSIFICA (Google Fogli + Apps Script) ----------
      Serve per: numeri porta-fortuna UNICI (biglietti reali), distinta su Fogli e classifica rigori visibile a tutti.
